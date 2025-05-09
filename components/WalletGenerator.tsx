@@ -40,9 +40,11 @@ interface Wallet {
 }
 
 const WalletGenerator = () => {
+  
   const [mnemonicWords, setMnemonicWords] = useState<string[]>(
     Array(12).fill(" ")
   );
+
   const [pathTypes, setPathTypes] = useState<string[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showMnemonic, setShowMnemonic] = useState<boolean>(false);
@@ -120,7 +122,7 @@ const WalletGenerator = () => {
   ): Wallet | null => {
     try {
       const seedBuffer = mnemonicToSeedSync(mnemonic);
-      const path = `m/44'/${pathType}'/0'/${accountIndex}'`;
+      const path = `m/44'/${pathType}'/${accountIndex}'/0'`;
       const { key: derivedSeed } = derivePath(path, seedBuffer.toString("hex"));
 
       let publicKeyEncoded: string;
@@ -136,9 +138,9 @@ const WalletGenerator = () => {
       } else if (pathType === "60") {
         // Ethereum
         const privateKey = Buffer.from(derivedSeed).toString("hex");
-        privateKeyEncoded = privateKey;
-
         const wallet = new ethers.Wallet(privateKey);
+        
+        privateKeyEncoded = privateKey;
         publicKeyEncoded = wallet.address;
       } else {
         toast.error("Unsupported path type.");
@@ -177,6 +179,7 @@ const WalletGenerator = () => {
       mnemonic,
       wallets.length
     );
+
     if (wallet) {
       const updatedWallets = [...wallets, wallet];
       setWallets(updatedWallets);
@@ -211,6 +214,7 @@ const WalletGenerator = () => {
       toast.success("Wallet generated successfully!");
     }
   };
+
   return (
     <div className="flex flex-col gap-4">
       {wallets.length === 0 && (
